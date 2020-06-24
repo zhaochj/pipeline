@@ -117,11 +117,12 @@ class Single:
 class DataBase:
     def __init__(self, connection: str, **kwargs):
         self._engine = create_engine(connection, **kwargs)
-        self._session = sessionmaker(self._engine)
+        self._Session = sessionmaker(self._engine)
+        self._session = self._Session()
 
     @property
-    def session(self):
-        return self._session()
+    def session(self):  # 使用property以属性方式提供给外界使用时不能正常操作数据库，故取消
+        return self._session
 
     @property
     def engine(self):
