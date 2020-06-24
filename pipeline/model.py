@@ -121,7 +121,7 @@ class DataBase:
         self._session = self._Session()
 
     @property
-    def session(self):  # 使用property以属性方式提供给外界使用时不能正常操作数据库，故取消
+    def session(self):
         return self._session
 
     @property
