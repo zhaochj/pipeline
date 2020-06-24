@@ -7,7 +7,7 @@ __pycache__/
 *.so
 
 #
-config.py
+pipeline/config.py
 .idea
 test.py
 
