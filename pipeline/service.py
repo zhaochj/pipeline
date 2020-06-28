@@ -140,5 +140,59 @@ def test_create_dag():
         print(e)
 
 
+def check_graph(graph: Graph) -> bool:
+    """验证是否是一个合法的DAG"""
+    # 在数据库中找出指定graph的所有顶点和边，存放在内存中进行遍历处理
+    query = db.session.query(Vertex).filter(Vertex.graph_id == graph.id)
+    vertexes = [vertex.id for vertex in query]  # 顶点的id列表
+    query = db.session.query(Edge).filter(Edge.graph_id == graph.id)
+    edges = [(edge.tail, edge.head) for edge in query]  # 边的弧尾弧头列表
+
+    # vertexes: [1, 2, 3, 4]
+    # edges: [(1, 2), (1, 3), (3, 2), (2, 4)]
+    # 需要找入度为0的顶点，那顶点的id在边的head中找不到
+
+    while True:
+        for i, v in enumerate(vertexes):
+            for _, h in edges:
+                if v == h:  # 顶点有入度
+                    break
+            else:  # 没有break，说明遍历一遍边后，没有找到以该顶点作为弧头的边，即没有入度为0
+                # 能进else中，说明该顶点入度为0，满足顶点删除条件
+                vertexes.pop(i)
+
+                # 找出以此顶点作为弧尾的边，需要删除
+                ejs = []  # 记录需要删除边的索引
+                for j, (t, _) in enumerate(edges):
+                    if t == v:
+                        ejs.append(j)
+
+                for j in reversed(ejs):  # 循环删除一个列表中的元素，需要从后往前删除
+                    edges.pop(j)
+                break  # 一旦找到入度为0的顶点，删除以该顶点为出度的边及顶点，删除后再循环
+        else:  # 遍历顶点，入度没有为0的顶点，检验不通过
+            return False
+        print(vertexes, edges)
+        if len(vertexes) + len(edges) == 0:  # 最后vertexes和edges都是空列表时是一个合法的DAG
+            try:
+                graph = db.session.query(Graph).filter(Graph.id == graph.id).first()
+                if graph:
+                    graph.checked = 1
+                db.session.add(graph)
+                db.session.commit()
+                return True
+            except Exception as e:
+                db.session.rollback()
+                raise e
+
+
+
+
+
+
+
+
+
+
 
 
