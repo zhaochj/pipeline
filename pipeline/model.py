@@ -25,6 +25,8 @@ class Graph(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(48), nullable=False)
     desc = Column(String(200), nullable=True)
+    checked = Column(Integer, nullable=False, default=0)
+    sealed = Column(Integer, nullable=False, default=0)
 
     # 一个图有哪些顶点，有哪些边
     vertexes = relationship('Vertex')
